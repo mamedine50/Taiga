@@ -1,10 +1,8 @@
 @import "tailwindcss";
 
-/* ============================================================
-   Design system « Nuit boréale » — mode sombre uniquement.
-   Les tokens deviennent des utilitaires Tailwind :
-   couleurs → bg-*/text-*/border-*, polices → font-*, rayons → rounded-*.
-   ============================================================ */
+/* Design system Nuit boreale (mode sombre uniquement).
+   Couleurs et rayons statiques -> utilitaires Tailwind generes automatiquement.
+   Polices next/font (basees sur var) dans un bloc @theme inline separe. */
 @theme {
   --color-bg: #0b121e;
   --color-surface: #121c2c;
@@ -18,13 +16,15 @@
   --color-success: #5bd98a;
   --color-error: #ff5d5d;
 
-  --font-display: var(--font-archivo), system-ui, sans-serif;
-  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
-
   --radius-card: 12px;
   --radius-btn: 9px;
   --radius-pill: 100px;
+}
+
+@theme inline {
+  --font-display: var(--font-archivo), system-ui, sans-serif;
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
 :root {

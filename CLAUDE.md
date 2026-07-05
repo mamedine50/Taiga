@@ -52,6 +52,17 @@ supabase gen types typescript --project-id cqalgxkxlxpwpmuzwhyj --schema public 
 > Le connecteur MCP Supabase pointe vers une AUTRE organisation : pour ce projet, passer par
 > la **CLI** (types) ou le **SQL Editor** (migrations), pas par le MCP.
 
+## RLS — conventions apprises (⚠️ à respecter dans les futures phases)
+- **Les tables de référence** (corridors, corridor_rates, et à venir : vehicles, drivers,
+  departures…) ne sont **pas lisibles par défaut** via l'app : il faut une politique de lecture
+  explicite (`for select using (true)` pour la donnée de référence publique) + `grant select`.
+  Sans ça, l'app reçoit 0 ligne (sans erreur) et les fonctions qui les lisent (ex. `quote_shipment`
+  lit `corridor_rates`) échouent. Voir migration `006`.
+- **Éviter la récursion de politiques** : deux tables dont les politiques SELECT se référencent
+  mutuellement (shipments ↔ missions) provoquent « infinite recursion detected in policy ».
+  Sortir la vérification croisée dans une fonction `security definer` (qui contourne la RLS interne).
+  Voir migration `007` (`is_shipment_in_my_missions`, `is_mission_mine_as_shipper`).
+
 ## Rôles & routage web
 `shipper → /expediteur` · `carrier → /transporteur` · `admin → /admin` · `driver → /chauffeur`.
 Auto-inscription réservée à **shipper** et **carrier**. Un transporteur reste **`non vérifié`**

@@ -23,3 +23,13 @@ export const ROAD_DIM_FACTOR_KG_PER_CBM = 333;
 export function chargeableWeightKg(realWeightKg: number, cbm: number): number {
   return Math.max(realWeightKg, cbm * ROAD_DIM_FACTOR_KG_PER_CBM);
 }
+
+/** Volume (m³) d'une ligne, miroir du calcul SQL de shipment_items.cbm. */
+export function cbmFromDimensions(
+  lengthCm: number,
+  widthCm: number,
+  heightCm: number,
+  qty: number,
+): number {
+  return (lengthCm * widthCm * heightCm * qty) / 1_000_000;
+}

@@ -929,6 +929,63 @@ export type Database = {
           },
         ]
       }
+      route_requests: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          dest_address: string | null
+          dest_city: string
+          id: string
+          notes: string | null
+          origin_address: string | null
+          origin_city: string
+          requested_by: string
+          requested_date: string | null
+          status: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          dest_address?: string | null
+          dest_city: string
+          id?: string
+          notes?: string | null
+          origin_address?: string | null
+          origin_city: string
+          requested_by: string
+          requested_date?: string | null
+          status?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          dest_address?: string | null
+          dest_city?: string
+          id?: string
+          notes?: string | null
+          origin_address?: string | null
+          origin_city?: string
+          requested_by?: string
+          requested_date?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipment_items: {
         Row: {
           cbm: number | null
@@ -1647,6 +1704,17 @@ export type Database = {
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
       quote_shipment: { Args: { sid: string }; Returns: Json }
+      request_custom_route: {
+        Args: {
+          p_dest_address?: string
+          p_dest_city: string
+          p_notes?: string
+          p_origin_address?: string
+          p_origin_city: string
+          p_requested_date?: string
+        }
+        Returns: string
+      }
       st_3dclosestpoint: {
         Args: { geom1: unknown; geom2: unknown }
         Returns: unknown

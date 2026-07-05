@@ -1,0 +1,22 @@
+{
+  "name": "taiga",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Taïga — plateforme de transport & logistique pour les régions éloignées du Québec.",
+  "packageManager": "pnpm@11.10.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "web": "pnpm --filter @taiga/web dev",
+    "mobile": "pnpm --filter @taiga/mobile start"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  }
+}

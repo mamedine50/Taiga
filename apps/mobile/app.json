@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Taïga",
+    "slug": "taiga",
+    "scheme": "taiga",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#0b1a14"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ca.taiga.app"
+    },
+    "android": {
+      "package": "ca.taiga.app"
+    }
+  }
+}

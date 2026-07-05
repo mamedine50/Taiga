@@ -1,0 +1,14 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Dépendances autorisées à exécuter leurs scripts de build natifs.
+# sharp : optimisation d'images de Next.js (paquet de confiance).
+allowBuilds:
+  sharp: true
+
+# Unifie @types/react sur une seule version dans tout le monorepo
+# (le web Next 15 exige la v19 ; la coquille mobile la tolère via skipLibCheck).
+overrides:
+  "@types/react": "19.2.17"
+  "@types/react-dom": "19.2.3"

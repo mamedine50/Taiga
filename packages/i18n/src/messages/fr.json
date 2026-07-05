@@ -1,0 +1,63 @@
+{
+  "common": {
+    "appName": "Taïga",
+    "tagline": "Transport & logistique pour les régions éloignées du Québec.",
+    "signIn": "Se connecter",
+    "signUp": "Créer un compte",
+    "signOut": "Se déconnecter",
+    "email": "Courriel",
+    "password": "Mot de passe",
+    "fullName": "Nom complet",
+    "loading": "Chargement…",
+    "language": "Langue",
+    "french": "Français",
+    "english": "English"
+  },
+  "roles": {
+    "shipper": "Expéditeur",
+    "carrier": "Transporteur",
+    "driver": "Chauffeur",
+    "admin": "Administrateur"
+  },
+  "auth": {
+    "signInTitle": "Connexion",
+    "signInSubtitle": "Accédez à votre espace Taïga.",
+    "signUpTitle": "Créer votre compte",
+    "signUpSubtitle": "Quelques informations et vous êtes prêt à expédier.",
+    "chooseRole": "Je suis un…",
+    "companySection": "Votre entreprise",
+    "companyName": "Raison sociale",
+    "neq": "NEQ (numéro d'entreprise du Québec)",
+    "neqOptional": "NEQ (optionnel)",
+    "city": "Ville",
+    "phone": "Téléphone",
+    "phoneOptional": "Téléphone (optionnel)",
+    "createAccountCta": "Créer mon compte",
+    "signInCta": "Se connecter",
+    "noAccount": "Pas encore de compte ?",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "goSignUp": "Créer un compte",
+    "goSignIn": "Se connecter",
+    "errorInvalidCredentials": "Courriel ou mot de passe invalide.",
+    "errorGeneric": "Une erreur est survenue. Réessayez.",
+    "errorEmailInUse": "Ce courriel est déjà utilisé.",
+    "carrierNote": "Les transporteurs doivent faire vérifier leurs documents avant d'accepter des missions."
+  },
+  "dashboard": {
+    "welcome": "Bonjour {name}",
+    "yourCompany": "Votre entreprise",
+    "yourRole": "Votre rôle",
+    "noCompany": "Aucune entreprise rattachée",
+    "verified": "Compte vérifié",
+    "unverifiedTitle": "Compte en attente de vérification",
+    "unverifiedBody": "Votre compte transporteur n'est pas encore vérifié. Téléversez vos documents (assurances, PEVL, permis) pour qu'un administrateur les valide. Aucune mission ne peut être acceptée tant que la vérification n'est pas complétée.",
+    "shipperHome": "Espace expéditeur",
+    "shipperHomeBody": "Vos expéditions et cotations apparaîtront ici.",
+    "carrierHome": "Espace transporteur",
+    "carrierHomeBody": "Vos missions et votre flotte apparaîtront ici.",
+    "adminHome": "Poste de commandement",
+    "adminHomeBody": "L'assignation des missions et la gestion des départs apparaîtront ici.",
+    "driverHome": "Espace chauffeur",
+    "driverHomeBody": "Les chauffeurs utilisent l'application mobile Taïga."
+  }
+}

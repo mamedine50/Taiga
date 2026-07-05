@@ -10,19 +10,24 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.48.1",
+    "@supabase/ssr": "^0.12.0",
+    "@supabase/supabase-js": "^2.110.0",
     "@taiga/core": "workspace:*",
+    "@taiga/i18n": "workspace:*",
     "@taiga/supabase": "workspace:*",
     "@taiga/types": "workspace:*",
     "next": "^15.1.6",
+    "next-intl": "^3.26.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.10.7",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2"
   }
 }

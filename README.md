@@ -84,6 +84,15 @@ via le **SQL Editor** de Supabase :
 1. `schema.sql` — tables, enums, RLS.
 2. `002_functions_triggers.sql` — profil auto à l'inscription, rollup des notes, `updated_at`, moteur de cotation `quote_shipment()`.
 3. `003_storage.sql` — buckets (documents, POD, signatures, factures) et leurs politiques d'accès.
+4. `004_auth_onboarding.sql` — `create_company_and_link()` : création d'entreprise + rattachement du profil à l'inscription (contourne proprement la RLS).
+
+## ⚠️ Avant la mise en production
+
+À NE PAS OUBLIER au lancement (voir aussi [CLAUDE.md](CLAUDE.md)) :
+
+- [ ] **Réactiver la confirmation par courriel obligatoire** (Supabase → Auth → Email → « Confirm email » = ON). En développement, l'auto-confirm est activé pour aller plus vite. ⚠️ Le flux d'inscription actuel suppose l'auto-confirm (l'entreprise est créée juste après `signUp`) : à réactiver la confirmation, revoir l'onboarding pour créer l'entreprise **après** confirmation.
+- [ ] **Configurer le SMTP avec Resend** (Supabase → Auth → SMTP) pour l'envoi réel des courriels, dans la langue du profil (`profiles.language`).
+- [ ] Réviser les politiques RLS restantes + lancer les *advisors* Supabase.
 
 ## Feuille de route
 

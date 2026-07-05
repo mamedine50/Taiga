@@ -1,68 +1,38 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Design system « Nuit boréale » — mode sombre uniquement.
+   Les tokens deviennent des utilitaires Tailwind :
+   couleurs → bg-*/text-*/border-*, polices → font-*, rayons → rounded-*.
+   ============================================================ */
+@theme {
+  --color-bg: #0b121e;
+  --color-surface: #121c2c;
+  --color-surface2: #18243a;
+  --color-border: #22314a;
+  --color-text: #edf3f8;
+  --color-muted: #8fa1b8;
+  --color-tertiary: #5c6e85;
+  --color-action: #ff7a29;
+  --color-live: #3fd9c2;
+  --color-success: #5bd98a;
+  --color-error: #ff5d5d;
+
+  --font-display: var(--font-archivo), system-ui, sans-serif;
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --radius-card: 12px;
+  --radius-btn: 9px;
+  --radius-pill: 100px;
+}
+
 :root {
-  --bg: #0b1a14;
-  --fg: #f2f7f4;
-  --muted: #9db3a8;
-  --accent: #2f9e6b;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
+  color-scheme: dark;
 }
 
 body {
-  min-height: 100vh;
-  background: var(--bg);
-  color: var(--fg);
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
-.landing {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 0.75rem;
-  padding: 2rem;
-}
-
-.badge {
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
-  border: 1px solid var(--accent);
-  border-radius: 999px;
-  padding: 0.25rem 0.75rem;
-}
-
-.landing h1 {
-  font-size: clamp(3rem, 10vw, 5rem);
-  margin: 0.25rem 0 0;
-  letter-spacing: -0.02em;
-}
-
-.tagline {
-  font-size: 1.1rem;
-  color: var(--fg);
-  max-width: 34rem;
-  line-height: 1.5;
-}
-
-.note {
-  color: var(--muted);
-  font-size: 0.95rem;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
 }

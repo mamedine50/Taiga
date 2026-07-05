@@ -1,0 +1,63 @@
+{
+  "common": {
+    "appName": "Taïga",
+    "tagline": "Freight & logistics for Québec's remote regions.",
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "signOut": "Sign out",
+    "email": "Email",
+    "password": "Password",
+    "fullName": "Full name",
+    "loading": "Loading…",
+    "language": "Language",
+    "french": "Français",
+    "english": "English"
+  },
+  "roles": {
+    "shipper": "Shipper",
+    "carrier": "Carrier",
+    "driver": "Driver",
+    "admin": "Administrator"
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "signInSubtitle": "Access your Taïga workspace.",
+    "signUpTitle": "Create your account",
+    "signUpSubtitle": "A few details and you're ready to ship.",
+    "chooseRole": "I am a…",
+    "companySection": "Your company",
+    "companyName": "Legal name",
+    "neq": "NEQ (Québec business number)",
+    "neqOptional": "NEQ (optional)",
+    "city": "City",
+    "phone": "Phone",
+    "phoneOptional": "Phone (optional)",
+    "createAccountCta": "Create my account",
+    "signInCta": "Sign in",
+    "noAccount": "Don't have an account yet?",
+    "haveAccount": "Already have an account?",
+    "goSignUp": "Create account",
+    "goSignIn": "Sign in",
+    "errorInvalidCredentials": "Invalid email or password.",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "errorEmailInUse": "This email is already in use.",
+    "carrierNote": "Carriers must have their documents verified before accepting missions."
+  },
+  "dashboard": {
+    "welcome": "Hello {name}",
+    "yourCompany": "Your company",
+    "yourRole": "Your role",
+    "noCompany": "No company linked",
+    "verified": "Verified account",
+    "unverifiedTitle": "Account pending verification",
+    "unverifiedBody": "Your carrier account is not verified yet. Upload your documents (insurance, PEVL, licences) so an administrator can validate them. No mission can be accepted until verification is complete.",
+    "shipperHome": "Shipper workspace",
+    "shipperHomeBody": "Your shipments and quotes will appear here.",
+    "carrierHome": "Carrier workspace",
+    "carrierHomeBody": "Your missions and fleet will appear here.",
+    "adminHome": "Command centre",
+    "adminHomeBody": "Mission assignment and departure management will appear here.",
+    "driverHome": "Driver workspace",
+    "driverHomeBody": "Drivers use the Taïga mobile app."
+  }
+}

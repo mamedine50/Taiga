@@ -1458,6 +1458,16 @@ export type Database = {
             }
             Returns: string
           }
+      create_company_and_link: {
+        Args: {
+          p_city?: string
+          p_language?: string
+          p_legal_name: string
+          p_neq?: string
+          p_phone?: string
+        }
+        Returns: string
+      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {

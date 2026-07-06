@@ -1,17 +1,134 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { Locale } from "@taiga/i18n";
 import { requireRole } from "@/lib/auth";
-import { DashboardIntro } from "@/components/dashboard-intro";
+import { getAssignableShipments, getCarriers, getRouteRequests } from "@/lib/dispatch";
+import { formatDate, formatMoney, formatNumber } from "@/lib/format";
+import { AssignForm } from "@/components/dispatch/assign-form";
+import { VerifyButton } from "@/components/dispatch/verify-button";
 
 export default async function AdminPage() {
-  const ctx = await requireRole("admin");
+  await requireRole("admin");
   const t = await getTranslations();
+  const locale = (await getLocale()) as Locale;
+
+  const [shipments, carriers, requests] = await Promise.all([
+    getAssignableShipments(),
+    getCarriers(),
+    getRouteRequests(),
+  ]);
+  const openRequests = requests.filter((r) => r.status === "nouveau").length;
 
   return (
-    <div className="space-y-6">
-      <DashboardIntro ctx={ctx} />
-      <section className="rounded-card border border-border bg-surface p-6">
-        <h2 className="font-display text-lg font-bold">{t("dashboard.adminHome")}</h2>
-        <p className="mt-1 text-sm text-muted">{t("dashboard.adminHomeBody")}</p>
+    <div className="space-y-8">
+      <h1 className="font-display text-2xl font-bold">{t("admin.title")}</h1>
+
+      {/* Expéditions à assigner */}
+      <section>
+        <h2 className="mb-3 font-display text-lg font-bold">{t("admin.toAssign")}</h2>
+        {shipments.length === 0 ? (
+          <p className="rounded-card border border-border bg-surface p-6 text-sm text-muted">
+            {t("admin.toAssignEmpty")}
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {shipments.map((s) => (
+              <div key={s.id} className="rounded-card border border-border bg-surface p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="font-mono text-sm text-action">{s.ref}</p>
+                    <p className="mt-1 text-sm text-muted">
+                      {s.originCity} → {s.destCity} · {formatDate(s.requestedDate, locale)}
+                    </p>
+                    <p className="mt-1 text-xs text-tertiary">
+                      {t("mission.weight")} :{" "}
+                      <span className="font-mono">
+                        {formatNumber(s.chargeableWeightKg, locale)} kg
+                      </span>{" "}
+                      · {t("admin.subtotal")} :{" "}
+                      <span className="font-mono">{formatMoney(s.subtotal, locale)}</span>
+                    </p>
+                  </div>
+                  <AssignForm shipmentId={s.id} subtotal={s.subtotal ?? 0} carriers={carriers} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Transporteurs */}
+      <section>
+        <h2 className="mb-3 font-display text-lg font-bold">{t("admin.carriers")}</h2>
+        {carriers.length === 0 ? (
+          <p className="rounded-card border border-border bg-surface p-6 text-sm text-muted">
+            {t("admin.carriersEmpty")}
+          </p>
+        ) : (
+          <div className="overflow-x-auto rounded-card border border-border bg-surface">
+            <table className="w-full text-sm">
+              <tbody>
+                {carriers.map((c) => (
+                  <tr key={c.id} className="border-b border-border/60 last:border-0">
+                    <td className="px-4 py-3">
+                      <span className="font-medium">{c.legalName}</span>
+                      {c.city && <span className="ml-2 text-muted">{c.city}</span>}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`rounded-pill border px-2.5 py-0.5 text-xs font-semibold ${
+                          c.verified
+                            ? "border-success/40 bg-success/10 text-success"
+                            : "border-tertiary/40 bg-tertiary/10 text-tertiary"
+                        }`}
+                      >
+                        {c.verified ? t("admin.verified") : t("admin.unverified")}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <VerifyButton companyId={c.id} verified={c.verified} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* Demandes de trajet hors-corridor */}
+      <section>
+        <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold">
+          {t("admin.routeRequests")}
+          {openRequests > 0 && (
+            <span className="rounded-pill bg-action px-2 py-0.5 text-xs font-semibold text-bg">
+              {openRequests} {t("admin.openRequests")}
+            </span>
+          )}
+        </h2>
+        {requests.length === 0 ? (
+          <p className="rounded-card border border-border bg-surface p-6 text-sm text-muted">
+            {t("admin.routeRequestsEmpty")}
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {requests.map((r) => (
+              <div
+                key={r.id}
+                className="rounded-card border border-border bg-surface p-4 text-sm"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-medium">
+                    {r.originCity} → {r.destCity}
+                  </span>
+                  <span className="text-xs text-tertiary">
+                    {r.requestedDate ? formatDate(r.requestedDate, locale) : formatDate(r.createdAt, locale)}
+                  </span>
+                </div>
+                {r.notes && <p className="mt-1 text-muted">{r.notes}</p>}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

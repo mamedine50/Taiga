@@ -1477,6 +1477,10 @@ export type Database = {
         Returns: unknown
       }
       _st_within: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      accept_mission: {
+        Args: { p_driver?: string; p_mission: string; p_vehicle?: string }
+        Returns: undefined
+      }
       addauth: { Args: { "": string }; Returns: boolean }
       addgeometrycolumn:
         | {
@@ -1515,6 +1519,16 @@ export type Database = {
             }
             Returns: string
           }
+      assign_shipment_to_carrier: {
+        Args: {
+          p_carrier: string
+          p_carrier_payout: number
+          p_expires_hours?: number
+          p_platform_fee: number
+          p_shipment: string
+        }
+        Returns: string
+      }
       create_company_and_link: {
         Args: {
           p_city?: string
@@ -1657,6 +1671,14 @@ export type Database = {
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
       gettransactionid: { Args: never; Returns: unknown }
+      is_mission_mine_as_shipper: {
+        Args: { p_mission: string }
+        Returns: boolean
+      }
+      is_shipment_in_my_missions: {
+        Args: { p_shipment: string }
+        Returns: boolean
+      }
       longtransactionsenabled: { Args: never; Returns: boolean }
       my_company: { Args: never; Returns: string }
       my_role: {
@@ -1704,6 +1726,7 @@ export type Database = {
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
       quote_shipment: { Args: { sid: string }; Returns: Json }
+      refuse_mission: { Args: { p_mission: string }; Returns: undefined }
       request_custom_route: {
         Args: {
           p_dest_address?: string

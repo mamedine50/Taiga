@@ -92,6 +92,7 @@ export type ShipmentDetail = {
   currency: string | null;
   quoteBreakdown: Json | null;
   corridorLabel: string | null;
+  assignedCarrier: string | null;
   items: ShipmentItem[];
 };
 
@@ -126,6 +127,25 @@ export async function getShipment(id: string): Promise<ShipmentDetail | null> {
     .eq("shipment_id", id)
     .order("id");
 
+  // Transporteur assigné (mission acceptée/en cours) — visible côté expéditeur.
+  let assignedCarrier: string | null = null;
+  const { data: links } = await supabase
+    .from("mission_shipments")
+    .select("missions(carrier_company_id, status)")
+    .eq("shipment_id", id);
+  for (const l of links ?? []) {
+    const m = l.missions as unknown as { carrier_company_id: string; status: string } | null;
+    if (m && ["acceptee", "en_cours", "completee"].includes(m.status)) {
+      const { data: co } = await supabase
+        .from("companies")
+        .select("legal_name")
+        .eq("id", m.carrier_company_id)
+        .single();
+      assignedCarrier = co?.legal_name ?? null;
+      break;
+    }
+  }
+
   return {
     id: s.id,
     ref: s.ref,
@@ -146,6 +166,7 @@ export async function getShipment(id: string): Promise<ShipmentDetail | null> {
     currency: s.currency,
     quoteBreakdown: s.quote_breakdown,
     corridorLabel,
+    assignedCarrier,
     items: (items ?? []).map((i) => ({
       id: i.id,
       description: i.description,

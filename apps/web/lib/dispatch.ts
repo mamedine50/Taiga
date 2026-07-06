@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { computeDocChip, type DocChip, mapDoc } from "@/lib/fleet";
 
 export type AssignableShipment = {
   id: string;
@@ -45,6 +46,7 @@ export type CarrierRow = {
   legalName: string;
   city: string | null;
   verified: boolean;
+  docChip: DocChip;
 };
 
 export async function getCarriers(): Promise<CarrierRow[]> {
@@ -54,11 +56,31 @@ export async function getCarriers(): Promise<CarrierRow[]> {
     .select("id, legal_name, city, verified")
     .eq("type", "carrier")
     .order("legal_name");
-  return (data ?? []).map((c) => ({
+  const carriers = data ?? [];
+
+  // Statut agrégé des documents par transporteur (chip du dispatch).
+  const byCompany = new Map<string, ReturnType<typeof mapDoc>[]>();
+  if (carriers.length > 0) {
+    const { data: docs } = await supabase
+      .from("carrier_documents")
+      .select("id, company_id, type, file_url, expires_at, status, created_at")
+      .in(
+        "company_id",
+        carriers.map((c) => c.id),
+      );
+    for (const d of docs ?? []) {
+      const arr = byCompany.get(d.company_id) ?? [];
+      arr.push(mapDoc(d));
+      byCompany.set(d.company_id, arr);
+    }
+  }
+
+  return carriers.map((c) => ({
     id: c.id,
     legalName: c.legal_name,
     city: c.city,
     verified: c.verified ?? false,
+    docChip: computeDocChip(byCompany.get(c.id) ?? []),
   }));
 }
 

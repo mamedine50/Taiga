@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { requireRole } from "@/lib/auth";
 import { getCarrierFleet, getOfferedMissions } from "@/lib/dispatch";
@@ -16,6 +17,15 @@ export default async function TransporteurPage() {
   return (
     <div className="space-y-6">
       <DashboardIntro ctx={ctx} />
+
+      <div className="flex gap-2">
+        <Link href="/transporteur/flotte" className="rounded-btn border border-border px-4 py-2.5 text-sm font-semibold hover:bg-surface2">
+          {t("fleet.nav")}
+        </Link>
+        <Link href="/transporteur/documents" className="rounded-btn border border-border px-4 py-2.5 text-sm font-semibold hover:bg-surface2">
+          {t("docs.nav")}
+        </Link>
+      </div>
 
       {!verified && (
         <div className="rounded-card border border-action/40 bg-action/10 p-6">

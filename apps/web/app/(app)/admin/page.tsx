@@ -6,6 +6,14 @@ import { getAssignableShipments, getCarriers, getRouteRequests } from "@/lib/dis
 import { formatDate, formatMoney, formatNumber } from "@/lib/format";
 import { AssignForm } from "@/components/dispatch/assign-form";
 import { VerifyButton } from "@/components/dispatch/verify-button";
+import type { DocChip } from "@/lib/fleet";
+
+const DOC_CHIP: Record<DocChip, { key: string; cls: string }> = {
+  valid: { key: "docs.chipValid", cls: "border-success/40 bg-success/10 text-success" },
+  expired: { key: "docs.chipExpired", cls: "border-error/40 bg-error/10 text-error" },
+  pending: { key: "docs.chipPending", cls: "border-tertiary/40 bg-tertiary/10 text-tertiary" },
+  none: { key: "docs.chipNone", cls: "border-border bg-surface2 text-muted" },
+};
 
 export default async function AdminPage() {
   await requireRole("admin");
@@ -76,28 +84,38 @@ export default async function AdminPage() {
           <div className="overflow-x-auto rounded-card border border-border bg-surface">
             <table className="w-full text-sm">
               <tbody>
-                {carriers.map((c) => (
-                  <tr key={c.id} className="border-b border-border/60 last:border-0">
-                    <td className="px-4 py-3">
-                      <span className="font-medium">{c.legalName}</span>
-                      {c.city && <span className="ml-2 text-muted">{c.city}</span>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`rounded-pill border px-2.5 py-0.5 text-xs font-semibold ${
-                          c.verified
-                            ? "border-success/40 bg-success/10 text-success"
-                            : "border-tertiary/40 bg-tertiary/10 text-tertiary"
-                        }`}
-                      >
-                        {c.verified ? t("admin.verified") : t("admin.unverified")}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <VerifyButton companyId={c.id} verified={c.verified} />
-                    </td>
-                  </tr>
-                ))}
+                {carriers.map((c) => {
+                  const chip = DOC_CHIP[c.docChip];
+                  return (
+                    <tr key={c.id} className="border-b border-border/60 last:border-0">
+                      <td className="px-4 py-3">
+                        <Link href={`/admin/transporteurs/${c.id}`} className="font-medium text-action hover:underline">
+                          {c.legalName}
+                        </Link>
+                        {c.city && <span className="ml-2 text-muted">{c.city}</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`rounded-pill border px-2.5 py-0.5 text-xs font-semibold ${chip.cls}`}>
+                          {t(chip.key)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`rounded-pill border px-2.5 py-0.5 text-xs font-semibold ${
+                            c.verified
+                              ? "border-success/40 bg-success/10 text-success"
+                              : "border-tertiary/40 bg-tertiary/10 text-tertiary"
+                          }`}
+                        >
+                          {c.verified ? t("admin.verified") : t("admin.unverified")}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <VerifyButton companyId={c.id} verified={c.verified} />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

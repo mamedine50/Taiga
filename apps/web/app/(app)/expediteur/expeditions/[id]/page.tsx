@@ -28,7 +28,7 @@ export default async function ExpeditionDetailPage({
           ← {t("quote.backToList")}
         </Link>
         <div className="mt-2 flex items-center gap-3">
-          <h1 className="font-mono font-display text-2xl font-bold">{detail.ref}</h1>
+          <h1 className="font-mono text-2xl font-bold">{detail.ref}</h1>
           <StatusBadge status={detail.status} label={t(`status.${detail.status}`)} />
         </div>
       </div>
@@ -67,6 +67,12 @@ export default async function ExpeditionDetailPage({
           <span>
             {t("form.requestedDate")} : {formatDate(detail.requestedDate, locale)}
           </span>
+          {detail.assignedCarrier && (
+            <span>
+              {t("quote.assignedCarrier")} :{" "}
+              <span className="text-live">{detail.assignedCarrier}</span>
+            </span>
+          )}
         </div>
       </div>
 

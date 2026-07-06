@@ -94,18 +94,20 @@ export type OfferedMission = {
   carrierPayout: number;
   platformFee: number;
   expiresAt: string | null;
-  ref: string | null;
+  shipmentCount: number;
+  totalChargeableWeightKg: number;
+  firstRef: string | null;
   originCity: string | null;
   destCity: string | null;
-  chargeableWeightKg: number | null;
+  isGrouped: boolean;
 };
 
-/** Missions offertes à un transporteur (1 expédition par mission en 1-à-1). */
+/** Missions offertes à un transporteur (1 expédition, ou un départ groupé). */
 export async function getOfferedMissions(carrierCompanyId: string): Promise<OfferedMission[]> {
   const supabase = await createClient();
   const { data: missions } = await supabase
     .from("missions")
-    .select("id, carrier_payout_amount, platform_fee_amount, expires_at")
+    .select("id, carrier_payout_amount, platform_fee_amount, expires_at, departure_id")
     .eq("carrier_company_id", carrierCompanyId)
     .eq("status", "offerte")
     .order("offered_at", { ascending: false });
@@ -121,10 +123,14 @@ export async function getOfferedMissions(carrierCompanyId: string): Promise<Offe
       list.map((m) => m.id),
     );
 
-  const byMission = new Map<
-    string,
-    { ref: string; originCity: string; destCity: string; chargeableWeightKg: number | null }
-  >();
+  type Agg = {
+    count: number;
+    weight: number;
+    firstRef: string | null;
+    originCity: string | null;
+    destCity: string | null;
+  };
+  const byMission = new Map<string, Agg>();
   for (const l of links ?? []) {
     const s = l.shipments as unknown as {
       ref: string;
@@ -132,27 +138,37 @@ export async function getOfferedMissions(carrierCompanyId: string): Promise<Offe
       dest_city: string;
       chargeable_weight_kg: number | null;
     } | null;
-    if (s && !byMission.has(l.mission_id)) {
-      byMission.set(l.mission_id, {
-        ref: s.ref,
-        originCity: s.origin_city,
-        destCity: s.dest_city,
-        chargeableWeightKg: s.chargeable_weight_kg,
-      });
+    if (!s) continue;
+    const agg = byMission.get(l.mission_id) ?? {
+      count: 0,
+      weight: 0,
+      firstRef: null,
+      originCity: null,
+      destCity: null,
+    };
+    agg.count += 1;
+    agg.weight += s.chargeable_weight_kg ?? 0;
+    if (agg.firstRef === null) {
+      agg.firstRef = s.ref;
+      agg.originCity = s.origin_city;
+      agg.destCity = s.dest_city;
     }
+    byMission.set(l.mission_id, agg);
   }
 
   return list.map((m) => {
-    const s = byMission.get(m.id);
+    const a = byMission.get(m.id);
     return {
       id: m.id,
       carrierPayout: m.carrier_payout_amount,
       platformFee: m.platform_fee_amount,
       expiresAt: m.expires_at,
-      ref: s?.ref ?? null,
-      originCity: s?.originCity ?? null,
-      destCity: s?.destCity ?? null,
-      chargeableWeightKg: s?.chargeableWeightKg ?? null,
+      shipmentCount: a?.count ?? 0,
+      totalChargeableWeightKg: a?.weight ?? 0,
+      firstRef: a?.firstRef ?? null,
+      originCity: a?.originCity ?? null,
+      destCity: a?.destCity ?? null,
+      isGrouped: m.departure_id !== null || (a?.count ?? 0) > 1,
     };
   });
 }

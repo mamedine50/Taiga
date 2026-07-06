@@ -64,13 +64,21 @@ export function MissionCard({
     <div className="rounded-card border border-border bg-surface p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-sm text-action">{mission.ref ?? "—"}</p>
+          {mission.isGrouped ? (
+            <p className="text-sm font-semibold text-action">
+              {t("mission.grouped")} · {t("mission.shipmentsCount", { count: mission.shipmentCount })}
+            </p>
+          ) : (
+            <p className="font-mono text-sm text-action">{mission.firstRef ?? "—"}</p>
+          )}
           <p className="mt-1 text-sm text-muted">
             {mission.originCity} → {mission.destCity}
           </p>
           <p className="mt-1 text-xs text-tertiary">
             {t("mission.weight")} :{" "}
-            <span className="font-mono">{formatNumber(mission.chargeableWeightKg, locale)} kg</span>
+            <span className="font-mono">
+              {formatNumber(mission.totalChargeableWeightKg, locale)} kg
+            </span>
           </p>
         </div>
         <div className="text-right">

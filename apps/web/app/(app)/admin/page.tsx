@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@taiga/i18n";
 import { requireRole } from "@/lib/auth";
@@ -20,7 +21,15 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="font-display text-2xl font-bold">{t("admin.title")}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-display text-2xl font-bold">{t("admin.title")}</h1>
+        <Link
+          href="/admin/departs"
+          className="rounded-btn border border-border px-4 py-2.5 text-sm font-semibold hover:bg-surface2"
+        >
+          {t("departure.nav")}
+        </Link>
+      </div>
 
       {/* Expéditions à assigner */}
       <section>

@@ -1048,6 +1048,7 @@ export type Database = {
           created_by: string
           currency: string | null
           declared_value: number | null
+          departure_id: string | null
           dest_address: string
           dest_city: string
           dest_lat: number | null
@@ -1084,6 +1085,7 @@ export type Database = {
           created_by: string
           currency?: string | null
           declared_value?: number | null
+          departure_id?: string | null
           dest_address: string
           dest_city: string
           dest_lat?: number | null
@@ -1120,6 +1122,7 @@ export type Database = {
           created_by?: string
           currency?: string | null
           declared_value?: number | null
+          departure_id?: string | null
           dest_address?: string
           dest_city?: string
           dest_lat?: number | null
@@ -1161,6 +1164,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_departure_id_fkey"
+            columns: ["departure_id"]
+            isOneToOne: false
+            referencedRelation: "departures"
             referencedColumns: ["id"]
           },
           {
@@ -1481,6 +1491,10 @@ export type Database = {
         Args: { p_driver?: string; p_mission: string; p_vehicle?: string }
         Returns: undefined
       }
+      add_shipment_to_departure: {
+        Args: { p_departure: string; p_shipment: string }
+        Returns: undefined
+      }
       addauth: { Args: { "": string }; Returns: boolean }
       addgeometrycolumn:
         | {
@@ -1519,6 +1533,16 @@ export type Database = {
             }
             Returns: string
           }
+      assign_departure_to_carrier: {
+        Args: {
+          p_carrier: string
+          p_carrier_payout: number
+          p_departure: string
+          p_expires_hours?: number
+          p_platform_fee: number
+        }
+        Returns: string
+      }
       assign_shipment_to_carrier: {
         Args: {
           p_carrier: string
@@ -1536,6 +1560,17 @@ export type Database = {
           p_legal_name: string
           p_neq?: string
           p_phone?: string
+        }
+        Returns: string
+      }
+      create_departure: {
+        Args: {
+          p_cap_cbm: number
+          p_cap_kg: number
+          p_cap_lf: number
+          p_corridor: string
+          p_date: string
+          p_terminal: string
         }
         Returns: string
       }
@@ -1727,6 +1762,10 @@ export type Database = {
       postgis_wagyu_version: { Args: never; Returns: string }
       quote_shipment: { Args: { sid: string }; Returns: Json }
       refuse_mission: { Args: { p_mission: string }; Returns: undefined }
+      remove_shipment_from_departure: {
+        Args: { p_shipment: string }
+        Returns: undefined
+      }
       request_custom_route: {
         Args: {
           p_dest_address?: string

@@ -11,6 +11,7 @@
     "check:boundary": "node scripts/check-data-boundary.mjs"
   },
   "dependencies": {
+    "@babel/runtime": "^7.25.0",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@supabase/supabase-js": "^2.110.0",
     "@taiga/core": "workspace:*",

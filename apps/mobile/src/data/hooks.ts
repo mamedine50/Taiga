@@ -3,8 +3,28 @@ import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import { getMission, getMissions } from "./repository";
+import { pendingCount } from "./outbox";
 import { syncFromServer } from "./sync";
 import type { MissionWithShipments } from "./types";
+
+/** Nombre d'actions en attente de synchro (indicateur hors-ligne). */
+export function usePendingCount(): number {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    const tick = async () => {
+      const c = await pendingCount();
+      if (alive) setN(c);
+    };
+    void tick();
+    const id = setInterval(tick, 3000);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, []);
+  return n;
+}
 
 export function useSession(): { session: Session | null; loading: boolean } {
   const [session, setSession] = useState<Session | null>(null);

@@ -1,7 +1,7 @@
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useSession } from "./src/data";
+import { startOutboxProcessor, useSession } from "./src/data";
 import { LoginScreen } from "./src/screens/LoginScreen";
 import { MissionsScreen } from "./src/screens/MissionsScreen";
 import { MissionDetailScreen } from "./src/screens/MissionDetailScreen";
@@ -16,6 +16,11 @@ type Nav =
 export default function App() {
   const { session, loading } = useSession();
   const [nav, setNav] = useState<Nav>({ screen: "missions" });
+
+  // Jalon 2 : démarre le drainage de l'outbox (réseau / 1er plan / démarrage).
+  useEffect(() => {
+    startOutboxProcessor();
+  }, []);
 
   let content: ReactNode;
   if (loading) {

@@ -19,23 +19,33 @@ export async function enqueue(kind: OutboxKind, payload: OutboxPayload): Promise
   await processOutbox();
 }
 
+let processing = false;
+
 export async function processOutbox(): Promise<void> {
-  const db = await getDb();
-  const rows = await db.getAllAsync<{ id: number; kind: string; payload: string }>(
-    "SELECT id, kind, payload FROM outbox WHERE status = 'pending' ORDER BY id",
-  );
-  for (const row of rows) {
-    try {
-      await handle(row.kind as OutboxKind, JSON.parse(row.payload) as OutboxPayload);
-      await db.runAsync("UPDATE outbox SET status = 'done' WHERE id = ?", row.id);
-    } catch (e) {
-      // Reste 'pending' : sera retenté (jalon 2 : au retour réseau).
-      await db.runAsync(
-        "UPDATE outbox SET attempts = attempts + 1, error = ? WHERE id = ?",
-        String(e),
-        row.id,
-      );
+  // Garde anti-chevauchement : plusieurs déclencheurs (réseau, 1er plan, enqueue)
+  // peuvent tirer en même temps.
+  if (processing) return;
+  processing = true;
+  try {
+    const db = await getDb();
+    const rows = await db.getAllAsync<{ id: number; kind: string; payload: string }>(
+      "SELECT id, kind, payload FROM outbox WHERE status = 'pending' ORDER BY id",
+    );
+    for (const row of rows) {
+      try {
+        await handle(row.kind as OutboxKind, JSON.parse(row.payload) as OutboxPayload);
+        await db.runAsync("UPDATE outbox SET status = 'done' WHERE id = ?", row.id);
+      } catch (e) {
+        // Reste 'pending' : sera retenté (au retour réseau / 1er plan).
+        await db.runAsync(
+          "UPDATE outbox SET attempts = attempts + 1, error = ? WHERE id = ?",
+          String(e),
+          row.id,
+        );
+      }
     }
+  } finally {
+    processing = false;
   }
 }
 

@@ -7,12 +7,13 @@ import {
   Text,
   View,
 } from "react-native";
-import { signOut, useMissions } from "../data";
+import { signOut, useMissions, usePendingCount } from "../data";
 import type { MissionWithShipments } from "../data";
 import { colors, radius, statusColor, statusLabelFr } from "../theme";
 
 export function MissionsScreen({ onSelect }: { onSelect: (id: string) => void }) {
   const { missions, loading, refreshing, sync } = useMissions();
+  const pending = usePendingCount();
 
   return (
     <View style={styles.container}>
@@ -22,6 +23,14 @@ export function MissionsScreen({ onSelect }: { onSelect: (id: string) => void })
           <Text style={styles.signout}>Se déconnecter</Text>
         </Pressable>
       </View>
+
+      {pending > 0 && (
+        <View style={styles.pendingBar}>
+          <Text style={styles.pendingText}>
+            ⏳ {pending} action{pending > 1 ? "s" : ""} en attente de synchronisation
+          </Text>
+        </View>
+      )}
 
       {loading ? (
         <ActivityIndicator color={colors.action} style={{ marginTop: 40 }} />
@@ -79,6 +88,18 @@ const styles = StyleSheet.create({
   },
   title: { color: colors.text, fontSize: 24, fontWeight: "800" },
   signout: { color: colors.muted, fontSize: 13 },
+  pendingBar: {
+    marginHorizontal: 16,
+    marginTop: 4,
+    marginBottom: 4,
+    borderRadius: radius.btn,
+    backgroundColor: "rgba(255,122,41,0.12)",
+    borderColor: colors.action,
+    borderWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  pendingText: { color: colors.action, fontSize: 13, fontWeight: "600" },
   empty: { color: colors.muted, textAlign: "center", marginTop: 40 },
   card: {
     backgroundColor: colors.surface,

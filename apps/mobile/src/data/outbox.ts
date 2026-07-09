@@ -1,0 +1,123 @@
+// File d'actions (OUTBOX) : toute écriture (statut, POD) est enfilée ici.
+// JALON 1 : le processeur s'exécute immédiatement (en ligne).
+// JALON 2 : le MÊME processeur sera aussi déclenché au retour réseau + retry
+//           — aucune réécriture, juste un déclencheur en plus.
+import * as FileSystem from "expo-file-system";
+import { getDb } from "./db";
+import { supabase } from "./supabase";
+import type { OutboxKind, OutboxPayload, PodPayload, StatusPayload } from "./types";
+
+export async function enqueue(kind: OutboxKind, payload: OutboxPayload): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    "INSERT INTO outbox (kind, payload, created_at) VALUES (?, ?, ?)",
+    kind,
+    JSON.stringify(payload),
+    new Date().toISOString(),
+  );
+  // Jalon 1 : traiter tout de suite. Si hors-ligne, l'action reste 'pending'.
+  await processOutbox();
+}
+
+export async function processOutbox(): Promise<void> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<{ id: number; kind: string; payload: string }>(
+    "SELECT id, kind, payload FROM outbox WHERE status = 'pending' ORDER BY id",
+  );
+  for (const row of rows) {
+    try {
+      await handle(row.kind as OutboxKind, JSON.parse(row.payload) as OutboxPayload);
+      await db.runAsync("UPDATE outbox SET status = 'done' WHERE id = ?", row.id);
+    } catch (e) {
+      // Reste 'pending' : sera retenté (jalon 2 : au retour réseau).
+      await db.runAsync(
+        "UPDATE outbox SET attempts = attempts + 1, error = ? WHERE id = ?",
+        String(e),
+        row.id,
+      );
+    }
+  }
+}
+
+export async function pendingCount(): Promise<number> {
+  const db = await getDb();
+  const r = await db.getFirstAsync<{ n: number }>(
+    "SELECT COUNT(*) as n FROM outbox WHERE status = 'pending'",
+  );
+  return r?.n ?? 0;
+}
+
+async function handle(kind: OutboxKind, payload: OutboxPayload): Promise<void> {
+  if (kind === "status") {
+    const p = payload as StatusPayload;
+    const { error } = await supabase.rpc("driver_mark_status", {
+      p_mission: p.missionId,
+      p_shipment: p.shipmentId,
+      p_status: p.status,
+    });
+    if (error) throw new Error(error.message);
+    return;
+  }
+
+  // POD : téléverse photos + signature dans le bucket 'pods', puis insère la ligne.
+  const p = payload as PodPayload;
+  const photoUrls: string[] = [];
+  for (let i = 0; i < p.photoUris.length; i++) {
+    const path = `${p.missionId}/${p.shipmentId}-${Date.now()}-${i}.jpg`;
+    await uploadLocalFile("pods", path, p.photoUris[i]!, "image/jpeg");
+    photoUrls.push(path);
+  }
+  let signatureUrl: string | null = null;
+  if (p.signatureUri) {
+    signatureUrl = `${p.missionId}/${p.shipmentId}-sig-${Date.now()}.png`;
+    await uploadLocalFile("pods", signatureUrl, p.signatureUri, "image/png");
+  }
+
+  const { error } = await supabase.from("pods").insert({
+    mission_id: p.missionId,
+    shipment_id: p.shipmentId,
+    photo_urls: photoUrls,
+    signature_url: signatureUrl,
+    signee_name: p.signeeName,
+    notes: p.notes ?? null,
+    captured_at: p.capturedAt,
+    lat: p.lat ?? null,
+    lng: p.lng ?? null,
+  });
+  if (error) throw new Error(error.message);
+}
+
+async function uploadLocalFile(
+  bucket: string,
+  path: string,
+  uri: string,
+  contentType: string,
+): Promise<void> {
+  const b64 = await FileSystem.readAsStringAsync(uri, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+  const { error } = await supabase.storage.from(bucket).upload(path, base64ToBytes(b64), {
+    contentType,
+    upsert: false,
+  });
+  if (error) throw new Error(error.message);
+}
+
+const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+function base64ToBytes(b64: string): Uint8Array {
+  const clean = b64.replace(/[^A-Za-z0-9+/]/g, "");
+  const out: number[] = [];
+  let acc = 0;
+  let bits = 0;
+  for (const ch of clean) {
+    const idx = B64.indexOf(ch);
+    if (idx === -1) continue;
+    acc = (acc << 6) | idx;
+    bits += 6;
+    if (bits >= 8) {
+      bits -= 8;
+      out.push((acc >> bits) & 0xff);
+    }
+  }
+  return new Uint8Array(out);
+}

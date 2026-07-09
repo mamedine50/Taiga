@@ -1575,6 +1575,10 @@ export type Database = {
         Returns: string
       }
       disablelongtransactions: { Args: never; Returns: string }
+      driver_mark_status: {
+        Args: { p_mission: string; p_shipment: string; p_status: string }
+        Returns: undefined
+      }
       dropgeometrycolumn:
         | {
             Args: {

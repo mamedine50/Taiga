@@ -17,15 +17,15 @@
     "@taiga/types": "workspace:*",
     "expo": "~52.0.0",
     "expo-file-system": "~18.0.6",
-    "expo-sqlite": "~15.0.3",
+    "expo-sqlite": "~15.1.4",
     "expo-status-bar": "~2.0.0",
     "react": "18.3.1",
-    "react-native": "0.76.6",
+    "react-native": "0.76.9",
     "react-native-url-polyfill": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.0",
-    "@types/react": "~18.3.12",
+    "@types/react": "18.3.31",
     "babel-preset-expo": "~12.0.0",
     "typescript": "^5.7.2"
   }

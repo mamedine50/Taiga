@@ -1,43 +1,43 @@
+import { type ReactNode, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { useSession } from "./src/data";
+import { LoginScreen } from "./src/screens/LoginScreen";
+import { MissionsScreen } from "./src/screens/MissionsScreen";
+import { MissionDetailScreen } from "./src/screens/MissionDetailScreen";
+import { colors } from "./src/theme";
 
-/**
- * COQUILLE — Phase 0.
- * Aucun écran métier ici tant que le portail web n'est pas fonctionnel
- * (comptes, cotation, paiement, dispatch). Cette vue confirme seulement
- * que l'app compile et démarre dans le monorepo.
- */
 export default function App() {
+  const { session, loading } = useSession();
+  const [selectedMission, setSelectedMission] = useState<string | null>(null);
+
+  let content: ReactNode;
+  if (loading) {
+    content = (
+      <View style={styles.splash}>
+        <Text style={styles.brand}>Taïga</Text>
+        <ActivityIndicator color={colors.action} style={{ marginTop: 16 }} />
+      </View>
+    );
+  } else if (!session) {
+    content = <LoginScreen />;
+  } else if (selectedMission) {
+    content = (
+      <MissionDetailScreen id={selectedMission} onBack={() => setSelectedMission(null)} />
+    );
+  } else {
+    content = <MissionsScreen onSelect={setSelectedMission} />;
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Taïga</Text>
-      <Text style={styles.subtitle}>Application chauffeur</Text>
-      <Text style={styles.note}>Coquille — Phase 0</Text>
+    <>
       <StatusBar style="light" />
-    </View>
+      {content}
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0b1a14",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  title: {
-    color: "#f2f7f4",
-    fontSize: 48,
-    fontWeight: "700",
-  },
-  subtitle: {
-    color: "#f2f7f4",
-    fontSize: 18,
-  },
-  note: {
-    color: "#9db3a8",
-    fontSize: 14,
-    marginTop: 8,
-  },
+  splash: { flex: 1, backgroundColor: colors.bg, alignItems: "center", justifyContent: "center" },
+  brand: { color: colors.text, fontSize: 44, fontWeight: "800" },
 });

@@ -166,8 +166,8 @@ export function PodScreen({
               onEmpty={() => Alert.alert("Signature requise", "Faites signer le réceptionnaire.")}
               webStyle={sigWebStyle}
               autoClear={false}
-              backgroundColor={colors.surface2}
-              penColor={colors.text}
+              backgroundColor={SIG_BG}
+              penColor={SIG_INK}
             />
           </View>
           <BigButton label="↺ Recommencer" onPress={() => sigRef.current?.clearSignature()} variant="ghost" />
@@ -241,10 +241,14 @@ function BigButton({
   );
 }
 
+// Canevas de signature : encre foncée sur fond blanc (comme sur papier),
+// lisible ici et une fois affichée côté web.
+const SIG_BG = "#ffffff";
+const SIG_INK = "#0b121e";
 const sigWebStyle = `.m-signature-pad{box-shadow:none;border:none;margin:0}
 .m-signature-pad--body{border:none}
 .m-signature-pad--footer{display:none;margin:0}
-body,html{background-color:${colors.surface2};height:100%}`;
+body,html{background-color:${SIG_BG};height:100%}`;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg, paddingTop: 60 },
@@ -284,7 +288,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: radius.card,
     overflow: "hidden",
-    backgroundColor: colors.surface2,
+    backgroundColor: SIG_BG,
   },
   card: {
     backgroundColor: colors.surface,

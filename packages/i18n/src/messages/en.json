@@ -146,6 +146,15 @@
     "backToList": "Back to my shipments",
     "assignedCarrier": "Assigned carrier"
   },
+  "pod": {
+    "title": "Proof of delivery",
+    "deliveredAt": "Delivered on",
+    "signee": "Received by",
+    "damages": "⚠️ Damage reported",
+    "noDamages": "No damage reported",
+    "photos": "Photos",
+    "signature": "Signature"
+  },
   "customRoute": {
     "title": "Request another route",
     "subtitle": "Your route isn't served yet? Describe it: our team will review it and get back to you.",

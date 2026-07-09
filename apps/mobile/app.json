@@ -18,7 +18,20 @@
       "package": "ca.taiga.app"
     },
     "plugins": [
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Taïga utilise l'appareil photo pour la preuve de livraison (photos du colis livré).",
+          "photosPermission": "Taïga accède à vos photos pour joindre une preuve de livraison."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Taïga enregistre le lieu de la livraison au moment de la preuve de livraison."
+        }
+      ]
     ]
   }
 }

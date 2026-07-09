@@ -93,7 +93,17 @@ export type ShipmentDetail = {
   quoteBreakdown: Json | null;
   corridorLabel: string | null;
   assignedCarrier: string | null;
+  pod: PodView | null;
   items: ShipmentItem[];
+};
+
+export type PodView = {
+  photoUrls: string[];
+  signatureUrl: string | null;
+  signeeName: string | null;
+  damages: boolean;
+  notes: string | null;
+  capturedAt: string | null;
 };
 
 /** Détail d'une expédition (RLS : l'appelant ne voit que les siennes / admin). */
@@ -146,6 +156,36 @@ export async function getShipment(id: string): Promise<ShipmentDetail | null> {
     }
   }
 
+  // Preuve de livraison (POD) — photos/signature via URLs signées (bucket privé).
+  let pod: PodView | null = null;
+  const { data: podRow } = await supabase
+    .from("pods")
+    .select("photo_urls, signature_url, signee_name, damages, notes, captured_at")
+    .eq("shipment_id", id)
+    .maybeSingle();
+  if (podRow) {
+    const photoUrls: string[] = [];
+    for (const path of podRow.photo_urls ?? []) {
+      const { data: signed } = await supabase.storage.from("pods").createSignedUrl(path, 3600);
+      if (signed?.signedUrl) photoUrls.push(signed.signedUrl);
+    }
+    let signatureUrl: string | null = null;
+    if (podRow.signature_url) {
+      const { data: signed } = await supabase.storage
+        .from("pods")
+        .createSignedUrl(podRow.signature_url, 3600);
+      signatureUrl = signed?.signedUrl ?? null;
+    }
+    pod = {
+      photoUrls,
+      signatureUrl,
+      signeeName: podRow.signee_name,
+      damages: podRow.damages ?? false,
+      notes: podRow.notes,
+      capturedAt: podRow.captured_at,
+    };
+  }
+
   return {
     id: s.id,
     ref: s.ref,
@@ -167,6 +207,7 @@ export async function getShipment(id: string): Promise<ShipmentDetail | null> {
     quoteBreakdown: s.quote_breakdown,
     corridorLabel,
     assignedCarrier,
+    pod,
     items: (items ?? []).map((i) => ({
       id: i.id,
       description: i.description,

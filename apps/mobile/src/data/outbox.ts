@@ -59,30 +59,35 @@ async function handle(kind: OutboxKind, payload: OutboxPayload): Promise<void> {
     return;
   }
 
-  // POD : téléverse photos + signature dans le bucket 'pods', puis insère la ligne.
+  // POD : chemins DÉTERMINISTES + upsert → un réessai après échec partiel ne
+  // crée jamais de doublon. Puis submit_pod (RPC atomique) = le « commit ».
   const p = payload as PodPayload;
+  const base = `${p.missionId}/${p.shipmentId}`;
   const photoUrls: string[] = [];
   for (let i = 0; i < p.photoUris.length; i++) {
-    const path = `${p.missionId}/${p.shipmentId}-${Date.now()}-${i}.jpg`;
+    const path = `${base}/photo-${i}.jpg`;
     await uploadLocalFile("pods", path, p.photoUris[i]!, "image/jpeg");
     photoUrls.push(path);
   }
   let signatureUrl: string | null = null;
   if (p.signatureUri) {
-    signatureUrl = `${p.missionId}/${p.shipmentId}-sig-${Date.now()}.png`;
+    signatureUrl = `${base}/signature.png`;
     await uploadLocalFile("pods", signatureUrl, p.signatureUri, "image/png");
   }
 
-  const { error } = await supabase.from("pods").insert({
-    mission_id: p.missionId,
-    shipment_id: p.shipmentId,
-    photo_urls: photoUrls,
-    signature_url: signatureUrl,
-    signee_name: p.signeeName,
-    notes: p.notes ?? null,
-    captured_at: p.capturedAt,
-    lat: p.lat ?? null,
-    lng: p.lng ?? null,
+  // Une seule transaction : upsert pods + statut « livré » + journal + mission complétée.
+  // Ces params acceptent NULL en base ; les types générés les marquent non-nullables.
+  const { error } = await supabase.rpc("submit_pod", {
+    p_mission: p.missionId,
+    p_shipment: p.shipmentId,
+    p_photo_urls: photoUrls,
+    p_signature_url: signatureUrl as unknown as string,
+    p_signee: p.signeeName,
+    p_damages: p.damages,
+    p_notes: (p.notes ?? null) as unknown as string,
+    p_lat: (p.lat ?? null) as unknown as number,
+    p_lng: (p.lng ?? null) as unknown as number,
+    p_captured_at: p.capturedAt,
   });
   if (error) throw new Error(error.message);
 }
@@ -98,7 +103,7 @@ async function uploadLocalFile(
   });
   const { error } = await supabase.storage.from(bucket).upload(path, base64ToBytes(b64), {
     contentType,
-    upsert: false,
+    upsert: true,
   });
   if (error) throw new Error(error.message);
 }

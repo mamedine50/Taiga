@@ -7,6 +7,7 @@ import { getShipment } from "@/lib/shipments";
 import { formatDate, formatNumber } from "@/lib/format";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { QuoteBreakdown } from "@/components/shipments/quote-breakdown";
+import { PodDisplay } from "@/components/shipments/pod-view";
 
 export default async function ExpeditionDetailPage({
   params,
@@ -32,6 +33,8 @@ export default async function ExpeditionDetailPage({
           <StatusBadge status={detail.status} label={t(`status.${detail.status}`)} />
         </div>
       </div>
+
+      {detail.pod && <PodDisplay pod={detail.pod} />}
 
       <QuoteBreakdown detail={detail} />
 

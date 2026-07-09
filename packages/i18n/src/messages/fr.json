@@ -146,6 +146,15 @@
     "backToList": "Retour à mes expéditions",
     "assignedCarrier": "Transporteur assigné"
   },
+  "pod": {
+    "title": "Preuve de livraison",
+    "deliveredAt": "Livré le",
+    "signee": "Réceptionnaire",
+    "damages": "⚠️ Dommages signalés",
+    "noDamages": "Aucun dommage signalé",
+    "photos": "Photos",
+    "signature": "Signature"
+  },
   "customRoute": {
     "title": "Demander un autre trajet",
     "subtitle": "Votre trajet n'est pas encore desservi ? Décrivez-le : notre équipe l'étudie et vous recontacte.",

@@ -830,7 +830,7 @@ export type Database = {
           {
             foreignKeyName: "pods_shipment_id_fkey"
             columns: ["shipment_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
@@ -2361,6 +2361,21 @@ export type Database = {
       st_wrapx: {
         Args: { geom: unknown; move: number; wrap: number }
         Returns: unknown
+      }
+      submit_pod: {
+        Args: {
+          p_captured_at: string
+          p_damages: boolean
+          p_lat: number
+          p_lng: number
+          p_mission: string
+          p_notes: string
+          p_photo_urls: string[]
+          p_shipment: string
+          p_signature_url: string
+          p_signee: string
+        }
+        Returns: undefined
       }
       unlockrows: { Args: { "": string }; Returns: number }
       updategeometrysrid: {

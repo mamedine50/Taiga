@@ -11,5 +11,5 @@ export type {
   ShipmentLocal,
   ShipmentStatus,
   StatusPayload,
-  PodPayload,
+  PodInput,
 } from "./types";

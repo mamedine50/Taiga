@@ -1,8 +1,15 @@
 // Repository : l'UNIQUE porte des écrans vers les données.
 // Lectures = SQLite. Écritures = outbox (jamais Supabase directement).
+import * as FileSystem from "expo-file-system";
 import { getDb } from "./db";
 import { enqueue } from "./outbox";
-import type { MissionWithShipments, PodPayload, ShipmentLocal, StatusPayload } from "./types";
+import type {
+  MissionWithShipments,
+  PodInput,
+  PodPayload,
+  ShipmentLocal,
+  StatusPayload,
+} from "./types";
 
 type MissionRow = {
   id: string;
@@ -20,6 +27,7 @@ type ShipmentRow = {
   dest_address: string;
   dest_city: string;
   chargeable_weight_kg: number | null;
+  has_pod: number;
 };
 
 function mapShipment(r: ShipmentRow): ShipmentLocal {
@@ -33,6 +41,7 @@ function mapShipment(r: ShipmentRow): ShipmentLocal {
     destAddress: r.dest_address,
     destCity: r.dest_city,
     chargeableWeightKg: r.chargeable_weight_kg,
+    hasPod: (r.has_pod ?? 0) === 1,
   };
 }
 
@@ -61,9 +70,50 @@ export async function markStatus(p: StatusPayload): Promise<void> {
   await enqueue("status", p);
 }
 
-/** Preuve de livraison : marque livré en local + enfile l'action (upload + insert). */
-export async function submitPod(p: PodPayload): Promise<void> {
+/**
+ * Preuve de livraison :
+ *   1. copie les fichiers (photos + signature) dans un dossier LOCAL PERSISTANT
+ *      → ils survivent au mode avion / à un redémarrage jusqu'à l'upload.
+ *   2. marque « livré » + « POD déposé » en local (optimiste, lecture seule).
+ *   3. enfile l'action dans l'outbox (upload déterministe + RPC submit_pod).
+ */
+export async function submitPod(input: PodInput): Promise<void> {
+  const dir = `${FileSystem.documentDirectory}pods/${input.shipmentId}/`;
+  await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+
+  const photoUris: string[] = [];
+  for (let i = 0; i < input.photoUris.length; i++) {
+    const dest = `${dir}photo-${i}.jpg`;
+    await FileSystem.copyAsync({ from: input.photoUris[i]!, to: dest });
+    photoUris.push(dest);
+  }
+
+  let signatureUri: string | null = null;
+  if (input.signatureBase64) {
+    signatureUri = `${dir}signature.png`;
+    const b64 = input.signatureBase64.replace(/^data:image\/\w+;base64,/, "");
+    await FileSystem.writeAsStringAsync(signatureUri, b64, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+  }
+
   const db = await getDb();
-  await db.runAsync("UPDATE shipments SET status = 'livre' WHERE id = ?", p.shipmentId);
-  await enqueue("pod", p);
+  await db.runAsync(
+    "UPDATE shipments SET status = 'livre', has_pod = 1 WHERE id = ?",
+    input.shipmentId,
+  );
+
+  const payload: PodPayload = {
+    missionId: input.missionId,
+    shipmentId: input.shipmentId,
+    photoUris,
+    signatureUri,
+    signeeName: input.signeeName,
+    damages: input.damages,
+    notes: input.notes,
+    capturedAt: input.capturedAt,
+    lat: input.lat,
+    lng: input.lng,
+  };
+  await enqueue("pod", payload);
 }

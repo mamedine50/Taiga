@@ -50,6 +50,19 @@ export async function syncFromServer(): Promise<void> {
       ).data ?? []
     : [];
 
+  // Quelles expéditions ont déjà un POD ? (verrouillage lecture seule côté chauffeur)
+  const shipmentIds = links
+    .map((l) => (l.shipments as unknown as ShipRow | null)?.id)
+    .filter((x): x is string => !!x);
+  const podShipmentIds = new Set<string>();
+  if (shipmentIds.length) {
+    const { data: pods } = await supabase
+      .from("pods")
+      .select("shipment_id")
+      .in("shipment_id", shipmentIds);
+    for (const p of pods ?? []) podShipmentIds.add(p.shipment_id);
+  }
+
   const db = await getDb();
   await db.withTransactionAsync(async () => {
     await db.execAsync("DELETE FROM missions; DELETE FROM shipments;");
@@ -68,7 +81,7 @@ export async function syncFromServer(): Promise<void> {
       const s = l.shipments as unknown as ShipRow | null;
       if (!s) continue;
       await db.runAsync(
-        "INSERT OR REPLACE INTO shipments (id, mission_id, ref, status, origin_address, origin_city, dest_address, dest_city, chargeable_weight_kg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT OR REPLACE INTO shipments (id, mission_id, ref, status, origin_address, origin_city, dest_address, dest_city, chargeable_weight_kg, has_pod) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         s.id,
         l.mission_id,
         s.ref,
@@ -78,6 +91,7 @@ export async function syncFromServer(): Promise<void> {
         s.dest_address,
         s.dest_city,
         s.chargeable_weight_kg,
+        podShipmentIds.has(s.id) ? 1 : 0,
       );
     }
   });

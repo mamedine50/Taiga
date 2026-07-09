@@ -44,6 +44,12 @@ export function getDb(): Promise<SQLite.SQLiteDatabase> {
           value TEXT
         );
       `);
+      // Migration idempotente : drapeau « POD déjà déposé » (verrouillage lecture seule).
+      try {
+        await db.execAsync("ALTER TABLE shipments ADD COLUMN has_pod INTEGER NOT NULL DEFAULT 0");
+      } catch {
+        // colonne déjà présente
+      }
       return db;
     })();
   }

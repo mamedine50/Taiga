@@ -10,6 +10,7 @@ export type ShipmentLocal = {
   destAddress: string;
   destCity: string;
   chargeableWeightKg: number | null;
+  hasPod: boolean;
 };
 
 export type MissionLocal = {
@@ -32,12 +33,28 @@ export type StatusPayload = {
   status: ShipmentStatus;
 };
 
+// Ce que l'écran POD envoie au repository (uris temporaires + signature base64).
+export type PodInput = {
+  missionId: string;
+  shipmentId: string;
+  photoUris: string[];
+  signatureBase64: string | null;
+  signeeName: string;
+  damages: boolean;
+  notes?: string;
+  lat?: number;
+  lng?: number;
+  capturedAt: string;
+};
+
+// Ce que l'outbox stocke (chemins de fichiers LOCAUX PERSISTANTS).
 export type PodPayload = {
   missionId: string;
   shipmentId: string;
   photoUris: string[];
   signatureUri: string | null;
   signeeName: string;
+  damages: boolean;
   notes?: string;
   capturedAt: string;
   lat?: number;

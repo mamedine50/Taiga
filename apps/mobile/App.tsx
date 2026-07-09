@@ -5,11 +5,17 @@ import { useSession } from "./src/data";
 import { LoginScreen } from "./src/screens/LoginScreen";
 import { MissionsScreen } from "./src/screens/MissionsScreen";
 import { MissionDetailScreen } from "./src/screens/MissionDetailScreen";
+import { PodScreen } from "./src/screens/PodScreen";
 import { colors } from "./src/theme";
+
+type Nav =
+  | { screen: "missions" }
+  | { screen: "detail"; missionId: string }
+  | { screen: "pod"; missionId: string; shipmentId: string; shipmentRef: string };
 
 export default function App() {
   const { session, loading } = useSession();
-  const [selectedMission, setSelectedMission] = useState<string | null>(null);
+  const [nav, setNav] = useState<Nav>({ screen: "missions" });
 
   let content: ReactNode;
   if (loading) {
@@ -21,12 +27,30 @@ export default function App() {
     );
   } else if (!session) {
     content = <LoginScreen />;
-  } else if (selectedMission) {
+  } else if (nav.screen === "pod") {
     content = (
-      <MissionDetailScreen id={selectedMission} onBack={() => setSelectedMission(null)} />
+      <PodScreen
+        missionId={nav.missionId}
+        shipmentId={nav.shipmentId}
+        shipmentRef={nav.shipmentRef}
+        onDone={() => setNav({ screen: "detail", missionId: nav.missionId })}
+        onCancel={() => setNav({ screen: "detail", missionId: nav.missionId })}
+      />
+    );
+  } else if (nav.screen === "detail") {
+    content = (
+      <MissionDetailScreen
+        id={nav.missionId}
+        onBack={() => setNav({ screen: "missions" })}
+        onOpenPod={(shipmentId, shipmentRef) =>
+          setNav({ screen: "pod", missionId: nav.missionId, shipmentId, shipmentRef })
+        }
+      />
     );
   } else {
-    content = <MissionsScreen onSelect={setSelectedMission} />;
+    content = (
+      <MissionsScreen onSelect={(missionId) => setNav({ screen: "detail", missionId })} />
+    );
   }
 
   return (

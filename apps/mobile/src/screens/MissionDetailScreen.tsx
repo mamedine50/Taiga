@@ -4,20 +4,27 @@ import { markStatus, useMission } from "../data";
 import type { ShipmentStatus } from "../data";
 import { colors, radius, statusColor, statusLabelFr } from "../theme";
 
+// Statuts « en route » appliqués à toute la mission ; la livraison passe par le POD.
 const STEPS: { status: ShipmentStatus; label: string }[] = [
   { status: "ramassage", label: "Ramassage effectué" },
   { status: "en_transit", label: "En transit" },
-  { status: "livre", label: "Livré" },
 ];
 
-export function MissionDetailScreen({ id, onBack }: { id: string; onBack: () => void }) {
+export function MissionDetailScreen({
+  id,
+  onBack,
+  onOpenPod,
+}: {
+  id: string;
+  onBack: () => void;
+  onOpenPod: (shipmentId: string, shipmentRef: string) => void;
+}) {
   const { mission, loading, reload } = useMission(id);
   const [busy, setBusy] = useState(false);
 
   const advance = async (status: ShipmentStatus) => {
     if (!mission) return;
     setBusy(true);
-    // Toute écriture passe par l'outbox (repository) — jamais Supabase direct.
     for (const s of mission.shipments) {
       await markStatus({ missionId: mission.id, shipmentId: s.id, status });
     }
@@ -56,6 +63,16 @@ export function MissionDetailScreen({ id, onBack }: { id: string; onBack: () => 
               </View>
               <Text style={styles.line}>Ramassage : {s.originAddress}, {s.originCity}</Text>
               <Text style={styles.line}>Livraison : {s.destAddress}, {s.destCity}</Text>
+
+              {s.hasPod ? (
+                <View style={styles.podDone}>
+                  <Text style={styles.podDoneText}>✓ Livré · preuve déposée (lecture seule)</Text>
+                </View>
+              ) : (
+                <Pressable onPress={() => onOpenPod(s.id, s.ref)} style={styles.podBtn}>
+                  <Text style={styles.podBtnText}>Preuve de livraison</Text>
+                </Pressable>
+              )}
             </View>
           ))}
 
@@ -95,12 +112,32 @@ const styles = StyleSheet.create({
   },
   ref: { color: colors.action, fontSize: 15, fontWeight: "600" },
   line: { color: colors.muted, fontSize: 13, marginTop: 2 },
-  actions: { gap: 10, marginTop: 8 },
-  actionBtn: {
+  podBtn: {
+    marginTop: 10,
     backgroundColor: colors.action,
     borderRadius: radius.btn,
     paddingVertical: 14,
     alignItems: "center",
   },
-  actionText: { color: colors.bg, fontSize: 15, fontWeight: "700" },
+  podBtnText: { color: colors.bg, fontSize: 15, fontWeight: "700" },
+  podDone: {
+    marginTop: 10,
+    borderColor: colors.success,
+    borderWidth: 1,
+    borderRadius: radius.btn,
+    paddingVertical: 12,
+    alignItems: "center",
+    backgroundColor: "rgba(91,217,138,0.10)",
+  },
+  podDoneText: { color: colors.success, fontSize: 14, fontWeight: "600" },
+  actions: { gap: 10, marginTop: 8 },
+  actionBtn: {
+    backgroundColor: colors.surface2,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: radius.btn,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  actionText: { color: colors.text, fontSize: 15, fontWeight: "700" },
 });

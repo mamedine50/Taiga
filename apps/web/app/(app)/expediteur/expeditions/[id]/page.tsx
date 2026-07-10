@@ -11,8 +11,10 @@ import { PodDisplay } from "@/components/shipments/pod-view";
 
 export default async function ExpeditionDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ reserved?: string }>;
 }) {
   await requireRole("shipper");
   const { id } = await params;
@@ -21,6 +23,7 @@ export default async function ExpeditionDetailPage({
 
   const t = await getTranslations();
   const locale = (await getLocale()) as Locale;
+  const justReserved = (await searchParams).reserved === "1";
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -38,17 +41,36 @@ export default async function ExpeditionDetailPage({
 
       <QuoteBreakdown detail={detail} />
 
-      {/* Paiement — arrive en Phase 3 */}
-      <div className="rounded-card border border-border bg-surface p-6">
-        <button
-          type="button"
-          disabled
-          className="w-full cursor-not-allowed rounded-btn bg-action/40 px-4 py-2.5 text-sm font-semibold text-bg"
-        >
-          {t("quote.payCta")}
-        </button>
-        <p className="mt-2 text-center text-xs text-tertiary">{t("quote.payComingSoon")}</p>
-      </div>
+      {/* Paiement / réservation */}
+      {detail.paymentStatus === "retenu" ? (
+        <div className="rounded-card border border-success/40 bg-success/5 p-6">
+          <p className="text-sm font-semibold text-success">{t("payment.reservedBanner")}</p>
+          {detail.invoiceUrl && (
+            <a
+              href={detail.invoiceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-block rounded-btn border border-border px-4 py-2 text-sm hover:bg-surface2"
+            >
+              {t("payment.downloadInvoice")}
+              {detail.invoiceNumber ? ` · ${detail.invoiceNumber}` : ""}
+            </a>
+          )}
+        </div>
+      ) : detail.status === "cote" && justReserved ? (
+        <div className="rounded-card border border-action/40 bg-action/10 p-6">
+          <p className="text-sm text-action">{t("payment.reservedPending")}</p>
+        </div>
+      ) : detail.status === "cote" ? (
+        <div className="rounded-card border border-border bg-surface p-6">
+          <Link
+            href={`/expediteur/expeditions/${detail.id}/payer`}
+            className="block w-full rounded-btn bg-action px-4 py-3 text-center text-sm font-semibold text-bg hover:brightness-110"
+          >
+            {t("quote.payCta")}
+          </Link>
+        </div>
+      ) : null}
 
       {/* Trajet */}
       <div className="rounded-card border border-border bg-surface p-6">

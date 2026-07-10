@@ -1553,6 +1553,16 @@ export type Database = {
         }
         Returns: string
       }
+      can_access_mission: { Args: { mid: string }; Returns: boolean }
+      confirm_reservation: {
+        Args: {
+          p_number: string
+          p_payment_intent: string
+          p_pdf_path: string
+          p_shipment: string
+        }
+        Returns: undefined
+      }
       create_company_and_link: {
         Args: {
           p_city?: string
@@ -1710,6 +1720,7 @@ export type Database = {
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
       gettransactionid: { Args: never; Returns: unknown }
+      is_mission_carrier: { Args: { mid: string }; Returns: boolean }
       is_mission_mine_as_shipper: {
         Args: { p_mission: string }
         Returns: boolean
@@ -1719,11 +1730,17 @@ export type Database = {
         Returns: boolean
       }
       longtransactionsenabled: { Args: never; Returns: boolean }
+      mark_capture_failed: {
+        Args: { p_reason: string; p_shipment: string }
+        Returns: undefined
+      }
+      mark_captured: { Args: { p_shipment: string }; Returns: undefined }
       my_company: { Args: never; Returns: string }
       my_role: {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      next_invoice_number: { Args: never; Returns: string }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
         | { Args: { use_typmod?: boolean }; Returns: string }

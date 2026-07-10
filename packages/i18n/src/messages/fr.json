@@ -155,6 +155,19 @@
     "photos": "Photos",
     "signature": "Signature"
   },
+  "payment": {
+    "title": "Paiement & réservation",
+    "subtitle": "Vos fonds sont autorisés maintenant et retenus jusqu'à la preuve de livraison.",
+    "loading": "Préparation du paiement…",
+    "payCta": "Payer et réserver {amount}",
+    "processing": "Traitement…",
+    "declined": "Paiement refusé. Vérifiez votre carte.",
+    "errorGeneric": "Le paiement n'a pas pu être initialisé.",
+    "reservedBanner": "Réservation confirmée — fonds retenus jusqu'à la livraison.",
+    "reservedPending": "Réservation en cours de confirmation…",
+    "downloadInvoice": "Télécharger la facture",
+    "back": "Retour"
+  },
   "customRoute": {
     "title": "Demander un autre trajet",
     "subtitle": "Votre trajet n'est pas encore desservi ? Décrivez-le : notre équipe l'étudie et vous recontacte.",

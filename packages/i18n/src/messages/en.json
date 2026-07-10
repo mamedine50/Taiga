@@ -155,6 +155,19 @@
     "photos": "Photos",
     "signature": "Signature"
   },
+  "payment": {
+    "title": "Payment & booking",
+    "subtitle": "Your funds are authorized now and held until proof of delivery.",
+    "loading": "Preparing payment…",
+    "payCta": "Pay & book {amount}",
+    "processing": "Processing…",
+    "declined": "Payment declined. Please check your card.",
+    "errorGeneric": "Payment could not be initialized.",
+    "reservedBanner": "Booking confirmed — funds held until delivery.",
+    "reservedPending": "Booking is being confirmed…",
+    "downloadInvoice": "Download invoice",
+    "back": "Back"
+  },
   "customRoute": {
     "title": "Request another route",
     "subtitle": "Your route isn't served yet? Describe it: our team will review it and get back to you.",

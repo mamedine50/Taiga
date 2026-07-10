@@ -94,6 +94,9 @@ export type ShipmentDetail = {
   corridorLabel: string | null;
   assignedCarrier: string | null;
   pod: PodView | null;
+  paymentStatus: string | null;
+  invoiceNumber: string | null;
+  invoiceUrl: string | null;
   items: ShipmentItem[];
 };
 
@@ -113,7 +116,7 @@ export async function getShipment(id: string): Promise<ShipmentDetail | null> {
   const { data: s } = await supabase
     .from("shipments")
     .select(
-      "id, ref, status, origin_address, origin_city, dest_address, dest_city, requested_date, declared_value, total_weight_kg, total_cbm, chargeable_weight_kg, subtotal, gst, qst, total_amount, currency, quote_breakdown, corridor_id",
+      "id, ref, status, payment_status, origin_address, origin_city, dest_address, dest_city, requested_date, declared_value, total_weight_kg, total_cbm, chargeable_weight_kg, subtotal, gst, qst, total_amount, currency, quote_breakdown, corridor_id",
     )
     .eq("id", id)
     .single();
@@ -186,10 +189,31 @@ export async function getShipment(id: string): Promise<ShipmentDetail | null> {
     };
   }
 
+  // Facture (si émise) — URL signée depuis le bucket privé.
+  let invoiceNumber: string | null = null;
+  let invoiceUrl: string | null = null;
+  const { data: inv } = await supabase
+    .from("invoices")
+    .select("number, pdf_url")
+    .eq("shipment_id", id)
+    .maybeSingle();
+  if (inv) {
+    invoiceNumber = inv.number;
+    if (inv.pdf_url) {
+      const { data: signed } = await supabase.storage
+        .from("invoices")
+        .createSignedUrl(inv.pdf_url, 3600);
+      invoiceUrl = signed?.signedUrl ?? null;
+    }
+  }
+
   return {
     id: s.id,
     ref: s.ref,
     status: s.status ?? "brouillon",
+    paymentStatus: s.payment_status,
+    invoiceNumber,
+    invoiceUrl,
     originAddress: s.origin_address,
     originCity: s.origin_city,
     destAddress: s.dest_address,

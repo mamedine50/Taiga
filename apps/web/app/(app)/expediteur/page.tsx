@@ -3,14 +3,18 @@ import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@taiga/i18n";
 import { requireRole } from "@/lib/auth";
 import { getMyShipments } from "@/lib/shipments";
+import { getShipperStats } from "@/lib/stats";
 import { formatDate, formatMoney } from "@/lib/format";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { StatTile } from "@/components/dashboard/stat-tile";
 
 export default async function ExpediteurPage() {
   const ctx = await requireRole("shipper");
   const t = await getTranslations();
   const locale = (await getLocale()) as Locale;
-  const shipments = ctx.company ? await getMyShipments(ctx.company.id) : [];
+  const [shipments, stats] = ctx.company
+    ? await Promise.all([getMyShipments(ctx.company.id), getShipperStats(ctx.company.id)])
+    : [[], { total: 0, toPay: 0, inProgress: 0, delivered: 0, totalAmount: 0 }];
 
   return (
     <div className="space-y-6">
@@ -30,6 +34,13 @@ export default async function ExpediteurPage() {
             {t("shipments.new")}
           </Link>
         </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatTile label={t("kpi.total")} value={String(stats.total)} />
+        <StatTile label={t("kpi.toPay")} value={String(stats.toPay)} accent={stats.toPay > 0 ? "action" : "default"} />
+        <StatTile label={t("kpi.inProgress")} value={String(stats.inProgress)} accent="live" />
+        <StatTile label={t("kpi.delivered")} value={String(stats.delivered)} accent="success" />
       </div>
 
       {shipments.length === 0 ? (

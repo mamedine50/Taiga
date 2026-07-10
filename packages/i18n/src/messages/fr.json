@@ -168,6 +168,24 @@
     "downloadInvoice": "Télécharger la facture",
     "back": "Retour"
   },
+  "kpi": {
+    "toAssign": "À assigner",
+    "activeMissions": "Missions actives",
+    "revenue": "Marge plateforme",
+    "carriers": "Transporteurs vérifiés",
+    "openDepartures": "Départs ouverts",
+    "openRequests": "Demandes ouvertes",
+    "byStatus": "Expéditions par statut",
+    "total": "Total expéditions",
+    "toPay": "À payer",
+    "inProgress": "En cours",
+    "delivered": "Livrées",
+    "totalAmount": "Montant total",
+    "offered": "Missions offertes",
+    "netRevenue": "Revenu net",
+    "fleet": "Flotte active",
+    "fleetSub": "{drivers} chauffeur(s) · {vehicles} véhicule(s)"
+  },
   "customRoute": {
     "title": "Demander un autre trajet",
     "subtitle": "Votre trajet n'est pas encore desservi ? Décrivez-le : notre équipe l'étudie et vous recontacte.",

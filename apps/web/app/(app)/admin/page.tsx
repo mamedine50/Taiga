@@ -3,9 +3,12 @@ import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@taiga/i18n";
 import { requireRole } from "@/lib/auth";
 import { getAssignableShipments, getCarriers, getRouteRequests } from "@/lib/dispatch";
+import { getAdminStats } from "@/lib/stats";
 import { formatDate, formatMoney, formatNumber } from "@/lib/format";
 import { AssignForm } from "@/components/dispatch/assign-form";
 import { VerifyButton } from "@/components/dispatch/verify-button";
+import { StatTile } from "@/components/dashboard/stat-tile";
+import { StatusBreakdown } from "@/components/dashboard/status-breakdown";
 import type { DocChip } from "@/lib/fleet";
 
 const DOC_CHIP: Record<DocChip, { key: string; cls: string }> = {
@@ -20,10 +23,11 @@ export default async function AdminPage() {
   const t = await getTranslations();
   const locale = (await getLocale()) as Locale;
 
-  const [shipments, carriers, requests] = await Promise.all([
+  const [shipments, carriers, requests, stats] = await Promise.all([
     getAssignableShipments(),
     getCarriers(),
     getRouteRequests(),
+    getAdminStats(),
   ]);
   const openRequests = requests.filter((r) => r.status === "nouveau").length;
 
@@ -38,6 +42,17 @@ export default async function AdminPage() {
           {t("departure.nav")}
         </Link>
       </div>
+
+      {/* KPIs */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StatTile label={t("kpi.toAssign")} value={String(stats.toAssign)} accent={stats.toAssign > 0 ? "action" : "default"} />
+        <StatTile label={t("kpi.activeMissions")} value={String(stats.activeMissions)} />
+        <StatTile label={t("kpi.revenue")} value={formatMoney(stats.platformRevenue, locale)} accent="live" />
+        <StatTile label={t("kpi.carriers")} value={`${stats.carriersVerified}/${stats.carriersTotal}`} />
+        <StatTile label={t("kpi.openDepartures")} value={String(stats.openDepartures)} />
+        <StatTile label={t("kpi.openRequests")} value={String(stats.openRouteRequests)} accent={stats.openRouteRequests > 0 ? "action" : "default"} />
+      </div>
+      <StatusBreakdown data={stats.shipmentsByStatus} />
 
       {/* Expéditions à assigner */}
       <section>

@@ -168,6 +168,24 @@
     "downloadInvoice": "Download invoice",
     "back": "Back"
   },
+  "kpi": {
+    "toAssign": "To assign",
+    "activeMissions": "Active missions",
+    "revenue": "Platform margin",
+    "carriers": "Verified carriers",
+    "openDepartures": "Open departures",
+    "openRequests": "Open requests",
+    "byStatus": "Shipments by status",
+    "total": "Total shipments",
+    "toPay": "To pay",
+    "inProgress": "In progress",
+    "delivered": "Delivered",
+    "totalAmount": "Total amount",
+    "offered": "Offered missions",
+    "netRevenue": "Net revenue",
+    "fleet": "Active fleet",
+    "fleetSub": "{drivers} driver(s) · {vehicles} vehicle(s)"
+  },
   "customRoute": {
     "title": "Request another route",
     "subtitle": "Your route isn't served yet? Describe it: our team will review it and get back to you.",
